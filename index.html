@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiggy Instamart | Strategic Outreach</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..800&family=Inter:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FC8019',
+                        secondary: '#000000',
+                        accent: '#22C55E',
+                        warning: '#F59E0B',
+                        dark: '#1A1A1A',
+                        paper: '#F4F4F4',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        heading: ['"Bricolage Grotesque"', 'sans-serif'],
+                        body: ['"Inter"', 'sans-serif'],
+                        mono: ['"Space Mono"', 'monospace'],
+                    },
+                    boxShadow: {
+                        brutal: '6px 6px 0px #1A1A1A',
+                        'brutal-hover': '8px 8px 0px #1A1A1A',
+                    },
+                    borderWidth: {
+                        4: '4px',
+                    },
+                    animation: {
+                        'marquee': 'marquee 25s linear infinite',
+                        'grow-up': 'growUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                        'grow-right': 'growRight 1s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                        'pop-in': 'popIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                        'spin-reveal': 'spinReveal 1s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' }
+                        },
+                        growUp: {
+                            '0%': { transform: 'scaleY(0)', transformOrigin: 'bottom' },
+                            '100%': { transform: 'scaleY(1)', transformOrigin: 'bottom' }
+                        },
+                        growRight: {
+                            '0%': { transform: 'scaleX(0)', transformOrigin: 'left' },
+                            '100%': { transform: 'scaleX(1)', transformOrigin: 'left' }
+                        },
+                        popIn: {
+                            '0%': { transform: 'scale(0.5)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        spinReveal: {
+                            '0%': { transform: 'scale(0) rotate(-90deg)', opacity: '0' },
+                            '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Core Reset & Neo-Brutalist Enforcements */
+        * { border-radius: 0 !important; font-style: normal !important; }
+        body { background-color: #F4F4F4; color: #1A1A1A; overflow-x: hidden; }
+        
+        /* Scroll Progress Bar */
+        #scroll-progress {
+            position: fixed; top: 0; left: 0; height: 6px; background-color: #FC8019;
+            width: 0%; z-index: 100; transition: width 0.1s ease-out; border-bottom: 2px solid #1A1A1A;
+        }
+
+        /* Scroll Animations (Intersection Observer Targets) */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal.is-visible { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* Chart Animations - Paused until visible */
+        .anim-paused { animation-play-state: paused !important; }
+        .is-visible .anim-paused { animation-play-state: running !important; }
+
+        /* Brutalist Components */
+        .brutal-card {
+            background: #FFFFFF; border: 4px solid #1A1A1A; box-shadow: 6px 6px 0px #1A1A1A;
+            transition: transform 0.15s linear, box-shadow 0.15s linear;
+        }
+        .brutal-card.interactive:hover {
+            transform: translate(-2px, -2px); box-shadow: 8px 8px 0px #1A1A1A;
+        }
+        .brutal-btn {
+            display: inline-block; font-family: 'Space Mono', monospace; text-transform: uppercase;
+            font-weight: 700; border: 4px solid #1A1A1A; box-shadow: 6px 6px 0px #1A1A1A;
+            padding: 12px 24px; transition: transform 0.1s linear, box-shadow 0.1s linear; cursor: pointer;
+        }
+        .brutal-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0px #1A1A1A; }
+        .brutal-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #1A1A1A; }
+        
+        .stamp {
+            position: absolute; font-family: 'Space Mono', monospace; font-weight: 700;
+            border: 4px solid #1A1A1A; padding: 4px 8px; background: #FFFFFF; text-transform: uppercase;
+            box-shadow: 4px 4px 0px #1A1A1A; white-space: nowrap; z-index: 10;
+        }
+
+        /* 
+         * Pie Chart CSS Hack
+         * Uses conic-gradient. Animated via a wrapper scale/spin reveal.
+         */
+        .pie-chart {
+            background: conic-gradient(
+                #FFFFFF 0% 48%, /* Millennials 48% */
+                #FC8019 48% 86%, /* Gen Z 38% */
+                #22C55E 86% 100% /* Gen X 14% */
+            );
+            border-radius: 50% !important; /* The only exception for radius is a literal pie chart */
+        }
+        
+        /* Grid patterns */
+        .bg-grid {
+            background-image: radial-gradient(rgba(26, 26, 26, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+
+        /* Accessibility preference */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; transform: none !important; }
+            .reveal { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="antialiased relative selection:bg-primary selection:text-white">
+    
+    <!-- Progress Bar -->
+    <div id="scroll-progress"></div>
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 pointer-events-none bg-grid" style="z-index: -1;"></div>
+
+    <!-- Ticker Top -->
+    <div class="w-full overflow-hidden border-b-4 border-dark bg-primary text-secondary font-mono font-bold uppercase py-2 hover:bg-dark hover:text-primary transition-colors cursor-default">
+        <div class="whitespace-nowrap w-max animate-marquee">
+            <span class="mx-4">SWIGGY IPO NOV 2024</span> •
+            <span class="mx-4">INSTAMART LOSSES NARROWING</span> •
+            <span class="mx-4">CATEGORY EXPANSION ELECTRONICS/BEAUTY</span> •
+            <span class="mx-4">SWIGGY ONE 5M+ MEMBERS</span> •
+            <span class="mx-4">600+ DARK STORES</span> •
+            <span class="mx-4">SWIGGY IPO NOV 2024</span> •
+            <span class="mx-4">INSTAMART LOSSES NARROWING</span> •
+            <span class="mx-4">CATEGORY EXPANSION ELECTRONICS/BEAUTY</span> •
+            <span class="mx-4">SWIGGY ONE 5M+ MEMBERS</span> •
+            <span class="mx-4">600+ DARK STORES</span>
+        </div>
+    </div>
+
+    <!-- SECTION 1: HERO INTRO (Laptop First, Fits 1366x768 Height) -->
+    <section id="hero-intro" class="min-h-[85vh] flex items-center lg:px-16 px-6 py-12">
+        <div class="grid lg:grid-cols-12 gap-12 w-full max-w-[1600px] mx-auto items-center">
+            
+            <!-- Hero Copy -->
+            <div class="lg:col-span-7 reveal">
+                <div class="inline-block p-2 border-4 border-dark bg-secondary text-primary font-mono font-bold uppercase mb-6 shadow-brutal">
+                    SUMMER INTERNSHIP // 2026
+                </div>
+                <h1 class="font-heading text-5xl lg:text-7xl font-extrabold leading-tight mb-6 uppercase tracking-tight">
+                    Hi, I'm Kunj...<br/>
+                    Here's what stands out about <span class="bg-primary text-dark px-2">Swiggy Instamart</span>
+                </h1>
+                <p class="font-body text-xl lg:text-2xl font-medium leading-relaxed border-l-4 pl-6 border-dark max-w-3xl">
+                    Leveraging <strong class="bg-dark text-white px-1">50M+ MAU</strong> and <strong class="bg-accent text-dark px-1">5M+ Swiggy One</strong> members to scale Quick Commerce. With <strong class="bg-primary text-dark px-1">600+ dark stores</strong> and narrowing post-IPO losses, Instamart is closing the profitability gap. The next unlock: converting food users and scaling high-margin ads to achieve super-app QC dominance.
+                </p>
+            </div>
+
+            <!-- Brutalist Impact Bar Chart -->
+            <div class="lg:col-span-5 reveal delay-200 relative">
+                <div class="stamp -rotate-12 top-[-20px] right-[-20px] text-accent text-xl">LOYALTY MOAT</div>
+                <div class="brutal-card p-6 flex flex-col gap-6 bg-paper relative">
+                    <h3 class="font-mono font-bold text-lg mb-2 uppercase border-b-4 border-dark pb-2">Ecosystem Scale</h3>
+                    
+                    <!-- Bar 1 -->
+                    <div class="relative w-full h-16 border-4 border-dark bg-white overflow-hidden">
+                        <div class="absolute inset-0 bg-primary w-full animate-grow-right anim-paused"></div>
+                        <div class="absolute inset-0 flex items-center justify-between px-4 font-mono font-bold z-10 w-full">
+                            <span>SWIGGY MAU</span>
+                            <span>50M+</span>
+                        </div>
+                    </div>
+
+                    <!-- Bar 2 -->
+                    <div class="relative w-[70%] h-16 border-4 border-dark bg-white overflow-hidden">
+                        <div class="absolute inset-0 bg-secondary w-full animate-grow-right anim-paused delay-100"></div>
+                        <div class="absolute inset-0 flex items-center justify-between px-4 font-mono font-bold text-white z-10 w-full">
+                            <span>DARK STORES</span>
+                            <span>600+</span>
+                        </div>
+                    </div>
+
+                    <!-- Bar 3 -->
+                    <div class="relative w-[50%] h-16 border-4 border-dark bg-white overflow-hidden">
+                        <div class="absolute inset-0 bg-accent w-full animate-grow-right anim-paused delay-200"></div>
+                        <div class="absolute inset-0 flex items-center justify-between px-4 font-mono font-bold z-10 w-full">
+                            <span>SWIGGY ONE</span>
+                            <span>5M+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: USER ANALYSIS -->
+    <section id="user-analysis" class="lg:px-16 px-6 py-24 bg-dark text-paper border-y-4 border-dark">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <div class="mb-16 reveal flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <h2 class="font-heading text-4xl lg:text-6xl font-extrabold uppercase leading-none max-w-3xl text-white">
+                    User Analysis: Who Orders, How They Shift, What's Next
+                </h2>
+                <p class="font-body text-lg border-l-4 border-primary pl-4 max-w-md bg-secondary p-4 shadow-[-6px_6px_0px_#FC8019]">
+                    Millennial-led, Gen Z-accelerating, Tier 1-dominant. The unlock is tailoring experiences by demographic.
+                </p>
+            </div>
+
+            <!-- 2x2 Data Wall -->
+            <div class="grid lg:grid-cols-2 gap-12">
+                
+                <!-- Chart 1: Donut -->
+                <div class="brutal-card !bg-secondary p-8 reveal delay-100 relative min-h-[400px] flex items-center justify-center">
+                    <h3 class="absolute top-4 left-4 font-mono font-bold uppercase text-white bg-dark border-4 border-paper px-2 z-20">AGE SPLIT</h3>
+                    <div class="stamp rotate-6 top-8 right-8 !bg-secondary !text-white !border-primary">REVENUE CORE</div>
+                    <div class="stamp -rotate-6 bottom-8 left-8 !bg-primary !text-dark !border-dark">GROWTH ENGINE</div>
+                    
+                    <div class="relative w-64 h-64 lg:w-80 lg:h-80">
+                        <div class="absolute inset-0 pie-chart animate-spin-reveal anim-paused"></div>
+                        <div class="absolute inset-4 bg-secondary !rounded-full border-4 border-paper z-10 flex items-center justify-center">
+                            <ul class="font-mono text-sm font-bold text-white uppercase text-center space-y-2">
+                                <li><span class="inline-block w-3 h-3 bg-white border-2 border-paper mr-2"></span>MILLENNIALS 48%</li>
+                                <li><span class="inline-block w-3 h-3 bg-primary mr-2"></span>GEN Z 38%</li>
+                                <li><span class="inline-block w-3 h-3 bg-accent mr-2"></span>GEN X+ 14%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Tier Geo Bars -->
+                <div class="brutal-card !bg-secondary p-8 reveal delay-200 relative min-h-[400px] flex flex-col justify-end border-4 border-paper">
+                    <h3 class="absolute top-4 left-4 font-mono font-bold uppercase text-white bg-dark border-4 border-paper px-2">TIER GEOGRAPHY</h3>
+                    <div class="flex items-end justify-around h-64 gap-4 w-full px-4 border-b-4 border-paper pb-0">
+                        
+                        <div class="w-1/3 h-full flex flex-col items-center justify-end group">
+                            <div class="w-full bg-primary h-[65%] border-4 border-b-0 border-paper animate-grow-up anim-paused relative">
+                                <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-mono font-bold text-white">65%</span>
+                            </div>
+                            <span class="font-mono font-bold mt-4 text-white uppercase text-center">TIER 1</span>
+                        </div>
+
+                        <div class="w-1/3 h-full flex flex-col items-center justify-end relative z-10">
+                            <div class="stamp -rotate-12 -top-12 z-20 !bg-accent !text-dark !border-dark whitespace-normal text-center leading-none text-sm p-1">EXPANSION FRONTIER</div>
+                            <div class="w-full bg-dark h-[30%] border-4 border-b-0 border-paper animate-grow-up anim-paused delay-100 relative">
+                                <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-mono font-bold text-white">30%</span>
+                            </div>
+                            <span class="font-mono font-bold mt-4 text-white uppercase text-center">TIER 2</span>
+                        </div>
+
+                        <div class="w-1/3 h-full flex flex-col items-center justify-end">
+                            <div class="w-full bg-paper h-[5%] border-4 border-b-0 border-dark animate-grow-up anim-paused delay-200 relative">
+                                <span class="absolute -top-8 left-1/2 -translate-x-1/2 font-mono font-bold text-white">5%</span>
+                            </div>
+                            <span class="font-mono font-bold mt-4 text-white uppercase text-center">TIER 3+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Behavior Shift Histogram -->
+                <div class="brutal-card !bg-paper p-8 reveal delay-100 flex flex-col justify-center gap-6">
+                    <h3 class="font-mono font-bold uppercase bg-dark text-white p-2 self-start border-4 border-dark">BEHAVIOR SHIFT YEAR/YEAR</h3>
+                    
+                    <div class="w-full text-dark">
+                        <div class="flex justify-between font-mono font-bold text-sm mb-1 uppercase"><span>Gen Z Non-Grocery</span> <span>15% → 35%</span></div>
+                        <div class="w-full h-10 border-4 border-dark bg-white relative">
+                            <div class="absolute inset-0 bg-primary w-[35%] border-r-4 border-dark animate-grow-right anim-paused"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-full text-dark">
+                        <div class="flex justify-between font-mono font-bold text-sm mb-1 uppercase"><span>Tier 2 Contribution</span> <span>20% → 30%</span></div>
+                        <div class="w-full h-10 border-4 border-dark bg-white relative">
+                            <div class="absolute inset-0 bg-accent w-[30%] border-r-4 border-dark animate-grow-right anim-paused delay-100"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-full text-dark">
+                        <div class="flex justify-between font-mono font-bold text-sm mb-1 uppercase"><span>Millennial Bundles</span> <span>25% → 40%</span></div>
+                        <div class="w-full h-10 border-4 border-dark bg-white relative">
+                            <div class="absolute inset-0 bg-secondary w-[40%] border-r-4 border-dark animate-grow-right anim-paused delay-200"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Matrix -->
+                <div class="brutal-card !bg-white p-8 reveal delay-200 relative min-h-[400px]">
+                    <h3 class="absolute top-4 left-4 font-mono font-bold uppercase bg-dark text-white px-2 border-4 border-dark z-20">DEMOGRAPHIC MATRIX</h3>
+                    
+                    <div class="absolute inset-x-8 top-16 bottom-16 border-l-4 border-b-4 border-dark">
+                        <!-- X-Axis Labels -->
+                        <div class="absolute -bottom-6 left-0 font-mono text-sm font-bold text-dark whitespace-nowrap">Low AOV</div>
+                        <div class="absolute -bottom-6 right-0 font-mono text-sm font-bold text-dark whitespace-nowrap">High AOV</div>
+                        
+                        <!-- Y-Axis Labels -->
+                        <div class="absolute -left-6 bottom-0 font-mono text-sm font-bold text-dark whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg);">Low Freq</div>
+                        <div class="absolute -left-6 top-0 font-mono text-sm font-bold text-dark whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg);">High Freq</div>
+                        
+                        <!-- Grid Lines -->
+                        <div class="absolute inset-0 border-t-4 border-r-4 border-dark border-dashed opacity-10 z-0"></div>
+                        <div class="absolute top-1/2 left-0 right-0 border-t-2 border-dark border-dashed opacity-10 z-0"></div>
+                        <div class="absolute left-1/2 top-0 bottom-0 border-l-2 border-dark border-dashed opacity-10 z-0"></div>
+
+                        <!-- Connection Arrow (Gen Z -> Millennial) -->
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" preserveAspectRatio="none">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <polygon points="0 0, 6 3, 0 6" fill="#1A1A1A" />
+                                </marker>
+                            </defs>
+                            <line x1="45%" y1="25%" x2="75%" y2="55%" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arrowhead)" />
+                        </svg>
+                        
+                        <!-- LTV Maturation Label -->
+                        <div class="absolute left-[60%] top-[40%] -translate-x-1/2 -translate-y-full mt-[-6px] text-dark bg-white border-2 border-dark px-1 py-0.5 font-mono text-[10px] font-bold z-10 whitespace-nowrap rounded-full uppercase">
+                            LTV MATURATION
+                        </div>
+
+                        <!-- Gen Z Explorers (Med AOV, High Freq) -->
+                        <div class="absolute left-[45%] top-[25%] -translate-x-1/2 -translate-y-1/2 w-8 h-8 group animate-pop-in anim-paused z-20">
+                            <div class="w-full h-full bg-primary border-4 border-dark rounded-full hover:scale-110 transition-transform relative z-10"></div>
+                            <div class="absolute top-full right-0 mt-2 font-mono text-[11px] font-bold text-dark bg-white border-2 border-dark px-2 py-1 whitespace-nowrap z-20">GEN Z EXPLORERS</div>
+                        </div>
+
+                        <!-- Millennial Families (High AOV, Med Freq) -->
+                        <div class="absolute left-[75%] top-[55%] -translate-x-1/2 -translate-y-1/2 w-8 h-8 group animate-pop-in anim-paused delay-100 z-20">
+                            <div class="w-full h-full bg-secondary border-4 border-dark rounded-full hover:scale-110 transition-transform relative z-10"></div>
+                            <div class="absolute top-full left-0 mt-2 font-mono text-[11px] font-bold text-dark bg-white border-2 border-dark px-2 py-1 whitespace-nowrap z-20">MILLENNIAL FAMILIES</div>
+                        </div>
+
+                        <!-- Tier 2 Aspirants (Low AOV, Growing Freq) -->
+                        <div class="absolute left-[25%] top-[75%] -translate-x-1/2 -translate-y-1/2 w-8 h-8 group animate-pop-in anim-paused delay-200 z-20">
+                            <div class="w-full h-full bg-accent border-4 border-dark rounded-full hover:scale-110 transition-transform relative z-10"></div>
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 font-mono text-[11px] font-bold text-dark bg-white border-2 border-dark px-2 py-1 whitespace-nowrap z-20">TIER 2 ASPIRANTS</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: COMPETITOR LANDSCAPE -->
+    <section id="competitor-landscape" class="lg:px-16 px-6 py-24 bg-paper bg-grid overflow-hidden relative">
+        <div class="max-w-[1600px] mx-auto grid lg:grid-cols-12 gap-12 items-center">
+            
+            <div class="lg:col-span-5 reveal">
+                <div class="inline-block p-2 border-4 border-dark bg-white text-dark font-mono font-bold uppercase mb-6 shadow-brutal">
+                    LANDSCAPE MAP
+                </div>
+                <h2 class="font-heading text-5xl lg:text-7xl font-extrabold uppercase leading-none mb-8">
+                    Competitive Position
+                </h2>
+                <p class="font-body text-xl font-medium leading-relaxed max-w-md border-l-4 border-primary pl-4 mb-8">
+                    <strong class="text-primary">Instamart</strong> leads on Super-App Synergy and Loyalty. Blinkit wins on scale. Zepto dominates speed perception. BigBasket has grocery depth.
+                </p>
+                
+                <h3 class="font-mono font-bold text-lg mb-4 uppercase">Instamart Edge Snapshot</h3>
+                <div class="flex flex-wrap gap-4 font-mono font-bold text-sm uppercase">
+                    <span class="border-4 border-dark bg-white px-3 py-2 shadow-[4px_4px_0px_#1A1A1A] flex items-center gap-2">
+                        Swiggy One <span class="text-accent text-lg leading-none">✅</span>
+                    </span>
+                    <span class="border-4 border-dark bg-white px-3 py-2 shadow-[4px_4px_0px_#1A1A1A] flex items-center gap-2">
+                        Dark Stores 600+ <span class="text-accent text-lg leading-none">✅</span>
+                    </span>
+                    <span class="border-4 border-dark bg-white px-3 py-2 shadow-[4px_4px_0px_#1A1A1A] flex items-center gap-2">
+                        Ads Scaling <span class="text-primary text-lg leading-none">🔄</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Position Matrix -->
+            <div class="lg:col-span-7 reveal delay-200">
+                <div class="brutal-card p-4 bg-white relative aspect-square lg:aspect-[4/3] w-full">
+                    
+                    <div class="absolute inset-10 border-l-4 border-b-4 border-dark">
+                        <!-- Axes Labels -->
+                        <span class="absolute -left-8 top-1/2 -translate-y-1/2 -rotate-90 font-mono font-bold text-sm uppercase bg-white px-2 z-10">Profitability Path</span>
+                        <span class="absolute -bottom-10 left-1/2 -translate-x-1/2 font-mono font-bold text-sm uppercase bg-white px-2 z-10 w-max">Ecosystem Synergy</span>
+                        
+                        <div class="absolute left-0 right-0 top-1/2 border-t-4 border-dark border-dashed opacity-20"></div>
+                        <div class="absolute top-0 bottom-0 left-1/2 border-l-4 border-dark border-dashed opacity-20"></div>
+
+                        <!-- Nodes -->
+                        <div class="absolute top-[10%] left-[50%] -translate-x-1/2 bg-primary border-4 border-dark text-dark font-mono font-bold px-4 py-2 shadow-brutal animate-pop-in anim-paused z-30 transform hover:scale-110 transition-transform cursor-crosshair">
+                            INSTAMART
+                        </div>
+
+                        <div class="absolute top-[15%] right-[10%] bg-dark border-4 border-dark text-white font-mono font-bold px-4 py-2 shadow-brutal animate-pop-in anim-paused delay-100 z-20">
+                            BLINKIT
+                        </div>
+
+                        <div class="absolute bottom-[20%] right-[15%] bg-dark border-4 border-dark text-white font-mono font-bold px-4 py-2 shadow-brutal animate-pop-in anim-paused delay-200 z-20">
+                            ZEPTO
+                        </div>
+
+                        <div class="absolute bottom-[30%] left-[10%] bg-warning border-4 border-dark text-dark font-mono font-bold px-4 py-2 shadow-brutal animate-pop-in anim-paused delay-300 z-20">
+                            BB NOW
+                        </div>
+
+                        <div class="absolute bottom-[10%] left-[30%] bg-dark border-4 border-dark text-white font-mono font-bold px-4 py-2 shadow-brutal animate-pop-in anim-paused delay-[400ms] z-20">
+                            MINUTES
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 4: SWOT + DRIVERS -->
+    <section id="swot-analysis" class="lg:px-16 px-6 py-24 bg-white border-t-4 border-dark">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <h2 class="font-heading text-5xl lg:text-7xl font-extrabold uppercase leading-none mb-12 text-center reveal">
+                Strategic Analysis
+            </h2>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-16">
+                <!-- SWOT block -->
+                <div class="grid grid-cols-2 gap-0 border-4 border-dark reveal delay-100 brutal-card interactive p-0 overflow-hidden">
+                    <div class="bg-primary p-6 border-b-4 border-r-4 border-dark">
+                        <h3 class="font-mono font-bold text-2xl mb-2 uppercase text-white drop-shadow-[2px_2px_0px_#1A1A1A]">Strengths</h3>
+                        <ul class="font-body font-medium list-disc pl-4 space-y-1">
+                            <li>Traffic synergy</li>
+                            <li>Swiggy One loyalty</li>
+                            <li>Brand trust</li>
+                            <li>IPO capital</li>
+                        </ul>
+                    </div>
+                    <div class="bg-warning p-6 border-b-4 border-dark">
+                        <h3 class="font-mono font-bold text-2xl mb-2 uppercase text-white drop-shadow-[2px_2px_0px_#1A1A1A]">Weaknesses</h3>
+                        <ul class="font-body font-medium list-disc pl-4 space-y-1">
+                            <li>Profit lag vs Blinkit</li>
+                            <li>Speed perception</li>
+                            <li>Ads scale smaller</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#FCD34D] p-6 border-r-4 border-dark">
+                        <h3 class="font-mono font-bold text-2xl mb-2 uppercase text-dark drop-shadow-[1px_1px_0px_#FFF]">Opportunities</h3>
+                        <ul class="font-body font-medium list-disc pl-4 space-y-1 text-dark">
+                            <li>Food-to-QC conversion</li>
+                            <li>Ads monetization</li>
+                            <li>Tier 2 expansion</li>
+                        </ul>
+                    </div>
+                    <div class="bg-dark p-6 text-white">
+                        <h3 class="font-mono font-bold text-2xl mb-2 uppercase text-accent">Threats</h3>
+                        <ul class="font-body font-medium list-disc pl-4 space-y-1">
+                            <li>Zepto aggression</li>
+                            <li>ONDC disruption</li>
+                            <li>Margin pressure</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Drivers -->
+                <div class="flex flex-col gap-6 reveal delay-200">
+                    <div class="brutal-card interactive p-6 flex items-start gap-4">
+                        <div class="w-12 h-12 bg-primary border-4 border-dark flex items-center justify-center text-2xl font-mono shadow-[2px_2px_0px_#1A1A1A] shrink-0">🧠</div>
+                        <div>
+                            <h4 class="font-heading font-extrabold text-2xl uppercase">User Driver</h4>
+                            <p class="font-body font-medium">Users want unified food + QC experience, removing app fragmentation.</p>
+                        </div>
+                    </div>
+                    <div class="brutal-card interactive p-6 flex items-start gap-4 bg-secondary text-white border-paper">
+                        <div class="w-12 h-12 bg-white border-4 border-paper text-dark flex items-center justify-center text-2xl font-mono shadow-[2px_2px_0px_#FFF] shrink-0">🤖</div>
+                        <div>
+                            <h4 class="font-heading font-extrabold text-2xl uppercase">Product Moat</h4>
+                            <p class="font-body font-medium">Swiggy One bundle and deep cross-category user data.</p>
+                        </div>
+                    </div>
+                    <div class="brutal-card interactive p-6 flex items-start gap-4">
+                        <div class="w-12 h-12 bg-accent border-4 border-dark flex items-center justify-center text-2xl font-mono shadow-[2px_2px_0px_#1A1A1A] shrink-0">📈</div>
+                        <div>
+                            <h4 class="font-heading font-extrabold text-2xl uppercase mb-1">Market Standard</h4>
+                            <p class="font-body font-medium">Market aggressively rewarding profitability and Ads leverage.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 5: INSIGHT & OPPORTUNITY ZONES -->
+    <section id="opportunity-zones" class="lg:px-16 px-6 py-24 bg-paper bg-grid overflow-hidden border-t-4 border-dark">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <div class="brutal-card bg-white p-8 lg:p-16 relative reveal border-primary">
+                <div class="stamp -rotate-6 -top-6 -left-6 bg-primary !text-dark !border-dark text-xl">KEY INSIGHT</div>
+                <div class="max-w-4xl">
+                    <h2 class="font-heading text-4xl lg:text-5xl font-extrabold uppercase leading-tight mb-6">
+                        Instamart has the super-app advantage. The next step is ecosystem conversion.
+                    </h2>
+                    <p class="font-body text-xl font-medium leading-relaxed text-dark bg-paper p-4 border-l-4 border-primary">
+                        Swiggy's 50M+ food users represent the largest untapped QC cohort. Using data, bundled loyalty, and ads, Instamart can turn traffic synergy into profitability leadership.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Path lines (hidden on mobile, visible lg) -->
+            <div class="hidden lg:block w-4 h-16 bg-primary mx-auto border-x-4 border-dark mb-0 reveal"></div>
+
+            <div class="grid lg:grid-cols-3 gap-8 mt-12 lg:mt-0">
+                <div class="brutal-card p-8 interactive bg-white reveal delay-100 flex flex-col items-start gap-4">
+                    <div class="w-16 h-16 bg-dark text-white text-3xl flex items-center justify-center border-4 border-primary shadow-[4px_4px_0px_#FC8019]">🔄</div>
+                    <h4 class="font-mono font-bold text-xl uppercase">Food-to-QC Conversion</h4>
+                    <p class="font-body font-medium">Cross-selling daily essentials to restaurant delivery power users based on checkout habits.</p>
+                </div>
+                
+                <div class="brutal-card p-8 interactive bg-primary border-dark reveal delay-200 flex flex-col items-start gap-4 transform lg:-translate-y-8 relative">
+                    <div class="stamp -rotate-12 -top-4 -right-4 bg-white !text-dark !border-dark">EXPLORE</div>
+                    <div class="w-16 h-16 bg-white text-dark text-3xl flex items-center justify-center border-4 border-dark shadow-brutal">🏆</div>
+                    <h4 class="font-mono font-bold text-xl uppercase text-dark">Swiggy One Lever</h4>
+                    <p class="font-body font-medium text-dark">Adjusting delivery bounds and cart minimums to drive exclusive QC retention over Zepto.</p>
+                </div>
+
+                <div class="brutal-card p-8 interactive bg-white reveal delay-300 flex flex-col items-start gap-4">
+                    <div class="w-16 h-16 bg-accent text-dark text-3xl flex items-center justify-center border-4 border-dark shadow-brutal">📊</div>
+                    <h4 class="font-mono font-bold text-xl uppercase">Ads Monetization</h4>
+                    <p class="font-body font-medium">Scaling FMCG sponsored placements and precision targeting across both Food and Instamart tabs.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 6: CTA + CONTACT -->
+    <section id="contact-cta" class="lg:px-16 px-6 py-32 bg-dark text-white border-t-4 border-dark relative">
+        <div class="max-w-[1200px] mx-auto text-center reveal">
+            
+            <div class="brutal-card interactive !bg-secondary border-paper p-10 lg:p-20 relative mx-auto max-w-4xl border-t-[12px] !border-t-primary shadow-[12px_12px_0px_#F4F4F4]">
+                <h2 class="font-heading text-4xl lg:text-6xl font-extrabold uppercase leading-tight mb-6">
+                    This is a space I'd genuinely love to explore deeper.
+                </h2>
+                <p class="font-body text-xl font-medium leading-relaxed max-w-2xl mx-auto mb-12 text-gray-300">
+                    I'm currently looking for an internship for Summer 2026, and would be excited to work on problems like this with your team.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12">
+                    <a href="https://calendly.com/kunjharjai13/30min" class="brutal-btn bg-primary text-dark border-paper hover:bg-white w-full sm:w-auto aria-label='Email Kunj'">
+                        Schedule a 15-min Chat &rarr;
+                    </a>
+                    <a href="https://www.linkedin.com/in/kunjharjai/" class="brutal-btn bg-dark text-white border-paper hover:bg-paper hover:text-dark w-full sm:w-auto aria-label='Kunj LinkedIn'">
+                        LinkedIn &rarr;
+                    </a>
+                </div>
+
+                <div class="font-mono font-bold bg-dark p-4 border-2 border-paper inline-block">
+                    <p class="text-primary text-sm uppercase">Kunj Harjai | Kunj.24141@sscbs.du.ac.in | +91 93 109 29 096</p>
+                </div>
+            </div>
+
+            <!-- Ticker Hook -->
+            <div class="mt-16 inline-block font-mono text-sm uppercase border-b-2 border-accent text-accent animate-bounce">
+                I have some rough thoughts on super-app conversion frameworks — happy to share if useful.
+            </div>
+
+        </div>
+    </section>
+
+    <!-- JS for Interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Scroll Progress Bar
+            const progressBar = document.getElementById('scroll-progress');
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                progressBar.style.width = scrolled + '%';
+            });
+
+            // Intersection Observer for Reveal animations
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // trigger when 15% visible
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        // Optional: stop observing once revealed
+                        // observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
